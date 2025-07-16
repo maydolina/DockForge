@@ -1,4 +1,11 @@
-from DockForge.prep import add_hydrogens, add_charges, simple_prepare_protein, advanced_prepare_protein
+from DockForge.prep import (add_hydrogens,
+                            add_charges,
+                            simple_prepare_protein,
+                            advanced_prepare_protein,
+                            prepare_ligand,
+                            batch_prepare_ligands,
+                            convert_to_pdb,
+                            batch_convert_to_pdb)
 
 #add_hydrogens("/Users/mina/Downloads/7lyj.pdb", "output.pdb")
 
@@ -6,4 +13,10 @@ from DockForge.prep import add_hydrogens, add_charges, simple_prepare_protein, a
 
 #simple_prepare_protein("/Users/mina/Downloads/7lyj.pdb", "output.pdbqt")
 
-advanced_prepare_protein("/Users/mina/Downloads/7lyj.pdb", "output.pdbqt")
+#advanced_prepare_protein("/Users/mina/Downloads/7lyj.pdb", "output.pdbqt")
+
+#prepare_ligand("/Users/mina/Downloads/asp.pdb", "output.pdbqt")
+
+#batch_prepare_ligands("/Users/mina/Downloads/dataset2/ligands", "prepared_ligands")
+
+batch_convert_to_pdb("/Users/mina/Downloads/dataset2/ligands", "prepared_ligands")
