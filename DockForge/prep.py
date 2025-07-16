@@ -14,7 +14,6 @@ def add_hydrogens(input_pdb, output_pdb):
 
     # save the new PDB with H
     mol.write("pdb", output_pdb, overwrite=True)
-    print(f"Hydrogens added and saved to {output_pdb}")
 
 
 
@@ -30,10 +29,9 @@ def add_charges(input_pdb, output_pdbqt):
         ], check=True)
         # saves file as PDBQT
 
-        print(f"Charges assigned and saved to {output_pdbqt}")
-
     except subprocess.CalledProcessError as e:
-        print("Error running Open Babel:", e)
+        print("\033[91mError running Open Babel:", e)
+
 
 
 
@@ -49,7 +47,10 @@ def simple_prepare_protein(input_pdb, output_pdbqt):
     ], check=True)
     # saves file as PDBQT
 
-    print(f"Protein prepared and saved to {output_pdbqt}")
+    print("Hydrogens added")
+    print("Waters removed")
+
+    print(f"\033[92mProtein prepared and saved to {output_pdbqt}")
 
 
 
@@ -62,16 +63,20 @@ def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
 
     # find missing residues
     fixer.findMissingResidues()
+    print("Missing residues added")
 
     # find & add missing atoms
     fixer.findMissingAtoms()
     fixer.addMissingAtoms()
+    print("Missing atoms added")
 
     # remove any ligands & water (non-protein)
     fixer.removeHeterogens(keepWater=False)
+    print("Any ligans & water (non-protein) removed")
 
     # add H at {ph}
     fixer.addMissingHydrogens(pH=ph)
+    print(f"Hydrogens added at pH {ph}")
 
     # save intermediate as PDB to temp_pdb
     with open(temp_pdb, 'w') as f:
@@ -91,7 +96,7 @@ def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
         os.remove(temp_pdb)
         print(f"Temporary file {temp_pdb} deleted.")
 
-    print(f"Protein prepared and saved to {output_pdbqt}")
+    print(f"\033[92mProtein prepared and saved to {output_pdbqt}")
 
 
 
@@ -104,17 +109,18 @@ def prepare_ligand(input_pdb, output_pdbqt):
 
         # add H
         add_hydrogens(input_pdb, temp_pdb)
+        print("Hydrogens added")
 
         # assign charges and save as PDBQT
         add_charges(temp_pdb, output_pdbqt)
+        print("Charges added")
 
     # remove temporary PDB intermediate
     finally:
         if os.path.exists(temp_pdb):
             os.remove(temp_pdb)
-            print(f"Deleted temporary file: {temp_pdb}")
 
-    print(f"Ligand prepared and saved as {output_pdbqt}")
+    print(f"\033[92mLigand prepared and saved as {output_pdbqt}")
 
 
 import subprocess
@@ -136,10 +142,10 @@ def convert_to_pdb(input_file, output_file=None):
             f"-i{input_type}", str(input_path),
             "-opdb", "-O", str(output_file)
         ], check=True)
-        print(f"Converted {input_file} to {output_file}")
+        print(f"\033[92mConverted {input_file} to {output_file}")
         return str(output_file)
     except subprocess.CalledProcessError as e:
-        print(f"Open Babel failed: {e}")
+        print(f"\033[91mOpen Babel failed: {e}")
         return None
 
 
@@ -154,7 +160,7 @@ def batch_convert_to_pdb(input_dir, output_dir):
     files = [f for f in input_dir.iterdir() if f.suffix.lower() in supported_types]
 
     if not files:
-        print("No supported input files found")
+        print("\033[91mNo supported input files found")
         return
 
     print(f"Converting {len(files)} files to PDB......\n")
@@ -169,11 +175,11 @@ def batch_convert_to_pdb(input_dir, output_dir):
                 f"-i{input_type}", str(file),
                 "-opdb", "-O", str(output_file)
             ], check=True)
-            print(f"Converted: {file.name} to {output_file.name}")
+            print(f"\033[92mConverted: {file.name} to {output_file.name}")
         except subprocess.CalledProcessError as e:
-            print(f"Failed to convert {file.name}: {e}")
+            print(f"\033[91mFailed to convert {file.name}: {e}")
 
-    print("\n Batch conversion complete.")
+    print("\n\033[94m Batch conversion complete.")
 
 
 
@@ -187,7 +193,7 @@ def batch_prepare_ligands(input_dir, output_dir):
     ligand_files = [f for f in input_dir.iterdir() if f.suffix.lower() in valid_extensions]
 
     if not ligand_files:
-        print("No valid ligand files found")
+        print("\033[91mNo valid ligand files found")
         return
 
     print(f"Found {len(ligand_files)} ligands in {input_dir}. Starting preparation......\n")
@@ -198,8 +204,8 @@ def batch_prepare_ligands(input_dir, output_dir):
         try:
             print(f"Preparing: {file.name}")
             prepare_ligand(str(file), str(output_file))
-            print(f"Saved: {output_file.name}\n")
+            print(f"\033[92mSaved: {output_file.name}\n")
         except Exception as e:
-            print(f"Failed to process {file.name}: {e}\n")
+            print(f"\033[91mFailed to process {file.name}: {e}\n")
 
-    print("Batch ligand preparation complete")
+    print("\033[94mBatch ligand preparation complete")

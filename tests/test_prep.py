@@ -17,6 +17,8 @@ from DockForge.prep import (add_hydrogens,
 
 #prepare_ligand("/Users/mina/Downloads/asp.pdb", "output.pdbqt")
 
-#batch_prepare_ligands("/Users/mina/Downloads/dataset2/ligands", "prepared_ligands")
+#batch_prepare_ligands("prepared_ligands", "2prepared_ligands")
 
-batch_convert_to_pdb("/Users/mina/Downloads/dataset2/ligands", "prepared_ligands")
+#batch_convert_to_pdb("/Users/mina/Downloads/dataset2/ligands", "prepared_ligands")
+
+print("\033[92mhello")
