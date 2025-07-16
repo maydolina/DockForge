@@ -1,22 +1,12 @@
-from rdkit import Chem
+from openbabel import pybel
 
 def add_hydrogens(input_pdb, output_pdb):
     # Load PDB
-    mol = Chem.MolFromPDBFile(input_pdb, removeHs=False, sanitize=False)
-    if mol is None:
-        print("Failed to load molecule.")
-        return
+    mol = next(pybel.readfile("pdb", input_pdb))
 
-    # Add H
-    mol_H = Chem.AddHs(mol)
+    # Add hydrogens
+    mol.addh()
 
-    # Optimize geometry
-    try:
-        AllChem.EmbedMolecule(mol_H)
-        AllChem.UFFOptimizeMolecule(mol_H)
-    except Exception as e:
-        print(f"Embedding/optimization failed: {e}")
-
-    # Save molecule as PDB
-    Chem.MolToPDBFile(mol_H, output_pdb)
+    # Write out the new PDB with hydrogens added
+    mol.write("pdb", output_pdb, overwrite=True)
     print(f"Saved molecule with hydrogens to {output_pdb}")
