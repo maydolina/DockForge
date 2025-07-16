@@ -38,6 +38,9 @@ def add_charges(input_pdb, output_pdbqt):
 # add H, remove waters
 def simple_prepare_protein(input_pdb, output_pdbqt):
 
+    mol = next(pybel.readfile("pdb", input_pdb))
+    print(f"\033[97m{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
+
     subprocess.run([
         "obabel",
         "-ipdb", input_pdb,
@@ -47,8 +50,8 @@ def simple_prepare_protein(input_pdb, output_pdbqt):
     ], check=True)
     # saves file as PDBQT
 
-    print("Hydrogens added")
-    print("Waters removed")
+    print("\033[97mHydrogens added")
+    print("\033[97mWaters removed")
 
     print(f"\033[92mProtein prepared and saved to {output_pdbqt}")
 
@@ -58,7 +61,7 @@ def simple_prepare_protein(input_pdb, output_pdbqt):
 def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
 
     mol = next(pybel.readfile("pdb", input_pdb))
-    print(f"{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
+    print(f"\033[97m{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
 
     temp_pdb = "temp_prepared.pdb"  # temporary intermediate
 
@@ -66,20 +69,20 @@ def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
 
     # find missing residues
     fixer.findMissingResidues()
-    print("Missing residues added")
+    print("\033[97mMissing residues added")
 
     # find & add missing atoms
     fixer.findMissingAtoms()
     fixer.addMissingAtoms()
-    print("Missing atoms added")
+    print("\033[97mMissing atoms added")
 
     # remove any ligands & water (non-protein)
     fixer.removeHeterogens(keepWater=False)
-    print("Any ligans & water (non-protein) removed")
+    print("\033[97mAny ligans & water (non-protein) removed")
 
     # add H at {ph}
     fixer.addMissingHydrogens(pH=ph)
-    print(f"Hydrogens added at pH {ph}")
+    print(f"\033[97mHydrogens added at pH {ph}")
 
     # save intermediate as PDB to temp_pdb
     with open(temp_pdb, 'w') as f:
@@ -97,7 +100,6 @@ def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
     # remove temp_pdb
     if os.path.exists(temp_pdb):
         os.remove(temp_pdb)
-        print(f"Temporary file {temp_pdb} deleted.")
 
     print(f"\033[92mProtein prepared and saved to {output_pdbqt}")
 
@@ -108,15 +110,15 @@ def prepare_ligand(input_pdb, output_pdbqt):
     temp_pdb = "temp_output.pdb" # temporary intermediate
 
     try:
-        print(f"Preparing ligand {input_pdb}...")
+        print(f"\033[97mPreparing ligand {input_pdb}....")
 
         # add H
         add_hydrogens(input_pdb, temp_pdb)
-        print("Hydrogens added")
+        print("\033[97mHydrogens added")
 
         # assign charges and save as PDBQT
         add_charges(temp_pdb, output_pdbqt)
-        print("Charges added")
+        print("\033[97mCharges added")
 
     # remove temporary PDB intermediate
     finally:
@@ -124,10 +126,6 @@ def prepare_ligand(input_pdb, output_pdbqt):
             os.remove(temp_pdb)
 
     print(f"\033[92mLigand prepared and saved as {output_pdbqt}")
-
-
-import subprocess
-from pathlib import Path
 
 
 
@@ -166,7 +164,7 @@ def batch_convert_to_pdb(input_dir, output_dir):
         print("\033[91mNo supported input files found")
         return
 
-    print(f"Converting {len(files)} files to PDB......\n")
+    print(f"\033[97mConverting {len(files)} files to PDB......\n")
 
     for file in files:
         input_type = file.suffix.lower().lstrip(".")
@@ -199,13 +197,13 @@ def batch_prepare_ligands(input_dir, output_dir):
         print("\033[91mNo valid ligand files found")
         return
 
-    print(f"Found {len(ligand_files)} ligands in {input_dir}. Starting preparation......\n")
+    print(f"\033[97mFound {len(ligand_files)} ligands in {input_dir}. Starting preparation......\n")
 
     for file in ligand_files:
         output_file = output_dir / (file.stem + ".pdbqt")
 
         try:
-            print(f"Preparing: {file.name}")
+            print(f"\033[97mPreparing: {file.name}")
             prepare_ligand(str(file), str(output_file))
             print(f"\033[92mSaved: {output_file.name}\n")
         except Exception as e:
@@ -224,8 +222,8 @@ def print_molecule_info(file_path):
     formula = mol.formula
     mol_weight = mol.molwt
 
-    print(f"Molecule: {file_path}")
-    print(f"Atoms: {num_atoms}")
-    print(f"Bonds: {num_bonds}")
-    print(f"Formula: {formula}")
-    print(f"Molecular Weight: {mol_weight:.2f} g/mol")
+    print(f"\033[97m---------- Molecule: {file_path} ----------")
+    print(f"\033[97mAtoms: {num_atoms}")
+    print(f"\033[97mBonds: {num_bonds}")
+    print(f"\033[97mFormula: {formula}")
+    print(f"\033[97mMolecular Weight: {mol_weight:.2f} g/mol")
