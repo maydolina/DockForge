@@ -86,3 +86,25 @@ def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
         print(f"Temporary file {output_pdb} deleted.")
 
     print(f"Protein prepared and saved to {output_pdbqt}")
+
+
+def prepare_ligand(input_pdb, output_pdbqt):
+
+    output_H = "temp_output.pdb" #temporary intermediate
+
+    try:
+        print(f"Preparing ligand {input_pdb}...")
+
+        # add H
+        add_hydrogens(input_pdb, output_H)
+
+        # assign charges and save as PDBQT
+        add_charges(output_H, output_pdbqt)
+
+    finally:
+        if os.path.exists(output_H):
+            os.remove(output_H)
+            print(f"Deleted temporary file: {output_H}")
+
+    print(f"Ligand prepared and saved as {output_pdbqt}")
+
