@@ -1,5 +1,6 @@
 import subprocess
 import os
+from pathlib import Path
 from openbabel import pybel
 from pdbfixer import PDBFixer
 from openmm.app import PDBFile
@@ -108,3 +109,30 @@ def prepare_ligand(input_pdb, output_pdbqt):
 
     print(f"Ligand prepared and saved as {output_pdbqt}")
 
+
+def batch_prepare_ligands(input_dir, output_dir):
+
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    valid_extensions = {".pdb", ".mol2", ".sdf", ".smi"}
+    ligand_files = [f for f in input_dir.iterdir() if f.suffix.lower() in valid_extensions]
+
+    if not ligand_files:
+        print("No valid ligand files found")
+        return
+
+    print(f"Found {len(ligand_files)} ligands in {input_dir}. Starting preparation...\n")
+
+    for file in ligand_files:
+        output_file = output_dir / (file.stem + ".pdbqt")
+
+        try:
+            print(f"Preparing: {file.name}")
+            prepare_ligand(str(file), str(output_file))
+            print(f"Saved: {output_file.name}\n")
+        except Exception as e:
+            print(f"Failed to process {file.name}: {e}\n")
+
+    print("Batch ligand preparation complete")
