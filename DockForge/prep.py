@@ -57,6 +57,9 @@ def simple_prepare_protein(input_pdb, output_pdbqt):
 # add H at ph 7, add charges, remove water&ligands, add missing atoms&residudes
 def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
 
+    mol = next(pybel.readfile("pdb", input_pdb))
+    print(f"{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
+
     temp_pdb = "temp_prepared.pdb"  # temporary intermediate
 
     fixer = PDBFixer(filename=input_pdb)
@@ -209,3 +212,20 @@ def batch_prepare_ligands(input_dir, output_dir):
             print(f"\033[91mFailed to process {file.name}: {e}\n")
 
     print("\033[94mBatch ligand preparation complete")
+
+
+
+def print_molecule_info(file_path):
+
+    mol = next(pybel.readfile("pdb", file_path))
+
+    num_atoms = len(mol.atoms)
+    num_bonds = mol.OBMol.NumBonds()
+    formula = mol.formula
+    mol_weight = mol.molwt
+
+    print(f"Molecule: {file_path}")
+    print(f"Atoms: {num_atoms}")
+    print(f"Bonds: {num_bonds}")
+    print(f"Formula: {formula}")
+    print(f"Molecular Weight: {mol_weight:.2f} g/mol")
