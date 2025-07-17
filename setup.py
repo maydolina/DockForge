@@ -11,6 +11,6 @@ setup(
     url="https://github.com/maydolina/DockForge",
     packages=find_packages(where="src"),
     python_requires=">=3.7",
-    install_requires=["openbabel", "pdbfixer", "openmm"],
+    install_requires=[],
     keywords= ["molecule", "docking", "molecular docking", "bioinformatics"]
 )

@@ -2,7 +2,7 @@
 A Python package for preparing proteins and ligands for molecular docking.  
 Includes: hydrogen addition, charge assignment, format conversion, cleanup.
 
-## Requirements
+## Dependencies
 Requires **Open Babel** to be installed separately. Install via:  
 ```brew install open-babel``` or ```conda install -c conda-forge openbabel```  
 See [Open Babel installation instructions](https://openbabel.org/docs/Installation/install.html).
