@@ -22,7 +22,7 @@ from DockForge.prep import (add_hydrogens,
 
 #batch_convert_to_pdb("ligands", "prepared_ligands")
 
-print("hello")
+#print("hello")
 
 #print_molecule_info("asp.pdb")
 
