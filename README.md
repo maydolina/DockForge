@@ -5,7 +5,7 @@ A Python package for preparing proteins and ligands for molecular docking.
 Includes: hydrogen addition, charge assignment, format conversion, cleanup.  
 
 ## Usage
-DockForge can be installed via:  
+The package can be installed via:  
 ```pip install DockForge```  
 
 ## Dependencies
