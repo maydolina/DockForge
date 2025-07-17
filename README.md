@@ -9,3 +9,4 @@ See [Open Babel installation instructions](https://openbabel.org/docs/Installati
   
 Also requires PDBfixer. Install via:  
 ```conda install -c conda-forge pdbfixer```
+[Website] (https://anaconda.org/conda-forge/pdbfixer)
