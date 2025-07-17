@@ -5,19 +5,42 @@ from openbabel import pybel
 from pdbfixer import PDBFixer
 from openmm.app import PDBFile
 
-def add_hydrogens(input_pdb, output_pdb):
+
+def check_openbabel():
+    try:
+        subprocess.run(["obabel", "-V"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except FileNotFoundError:
+        print("\033[91mERROR: Open Babel (obabel) not found. Please install it and ensure it's in PATH.")
+        exit(1)
+
+
+def add_hydrogens(input_pdb, output_pdb=None):
     # load PDB
     mol = next(pybel.readfile("pdb", input_pdb))
+
+    # default value for output_pdb
+    input_path = Path(input_pdb)
+    if not output_pdb:
+        output_pdb = input_path.with_name(f"{input_path.stem}_with_h.pdb")
 
     # add H
     mol.addh()
 
     # save the new PDB with H
-    mol.write("pdb", output_pdb, overwrite=True)
+    mol.write("pdb", str(output_pdb), overwrite=True)
 
 
 
-def add_charges(input_pdb, output_pdbqt):
+def add_charges(input_pdb, output_pdbqt=None):
+
+    # default value for output_pdbqt
+    input_path = Path(input_pdb)
+    if not output_pdbqt:
+        output_pdbqt = input_path.with_name(f"{input_path.stem}_with_charges.pdbqt")
+
+    output_pdbqt = Path(output_pdbqt)
+    if output_pdbqt.exists():
+        print(f"\033[93mWARNING: Overwriting existing file {output_pdbqt.name}")
 
     try:
         subprocess.run([
@@ -30,16 +53,24 @@ def add_charges(input_pdb, output_pdbqt):
         # saves file as PDBQT
 
     except subprocess.CalledProcessError as e:
-        print("\033[91mError running Open Babel:", e)
+        print("\033[91mERROR running Open Babel:", e)
 
 
 
 
 # add H, remove waters
-def simple_prepare_protein(input_pdb, output_pdbqt):
+def simple_prepare_protein(input_pdb, output_pdbqt=None):
 
     mol = next(pybel.readfile("pdb", input_pdb))
     print(f"\033[97m{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
+
+    # default value for output_pdbqt
+    input_path = Path(input_pdb)
+    if not output_pdbqt:
+        output_pdbqt = input_path.with_name(f"{input_path.stem}_prepared.pdbqt")
+
+    if output_pdbqt.exists():
+        print(f"\033[93mWARNING: Overwriting existing file {output_pdbqt.name}")
 
     subprocess.run([
         "obabel",
@@ -53,21 +84,29 @@ def simple_prepare_protein(input_pdb, output_pdbqt):
     print("\033[97mHydrogens added")
     print("\033[97mWaters removed")
 
-    print(f"\033[92mProtein prepared and saved to {output_pdbqt}")
+    print(f"\033[92mProtein prepared and saved as: {output_pdbqt}")
 
 
 
 # add H at ph 7, add charges, remove water&ligands, add missing atoms&residudes
-def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
+def advanced_prepare_protein(input_pdb, output_pdbqt=None, ph=7.0):
 
     mol = next(pybel.readfile("pdb", input_pdb))
     print(f"\033[97m{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
 
-    temp_pdb = "temp_prepared.pdb"  # temporary intermediate
+    # default value for output_pdbqt
+    input_path = Path(input_pdb)
+    if not output_pdbqt:
+        output_pdbqt = input_path.with_name(f"{input_path.stem}_prepared.pdbqt")
+
+    if output_pdbqt.exists():
+        print(f"\033[93mWARNING: Overwriting existing file {output_pdbqt.name}")
+
+    temp_pdb = f"temp_{input_path.stem}.pdb"  # temporary intermediate
 
     fixer = PDBFixer(filename=input_pdb)
 
-    # find missing residues
+    # find missing residudes
     fixer.findMissingResidues()
     print("\033[97mMissing residues added")
 
@@ -78,7 +117,7 @@ def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
 
     # remove any ligands & water (non-protein)
     fixer.removeHeterogens(keepWater=False)
-    print("\033[97mAny ligans & water (non-protein) removed")
+    print("\033[97mAny ligand & water (non-protein) removed")
 
     # add H at {ph}
     fixer.addMissingHydrogens(pH=ph)
@@ -101,16 +140,21 @@ def advanced_prepare_protein(input_pdb, output_pdbqt, ph=7.0):
     if os.path.exists(temp_pdb):
         os.remove(temp_pdb)
 
-    print(f"\033[92mProtein prepared and saved to {output_pdbqt}")
+    print(f"\033[92mProtein prepared and saved as: {output_pdbqt}")
 
 
 
-def prepare_ligand(input_pdb, output_pdbqt):
+def prepare_ligand(input_pdb, output_pdbqt=None):
 
-    temp_pdb = "temp_output.pdb" # temporary intermediate
+    # default value for output_pdbqt
+    input_path = Path(input_pdb)
+    if not output_pdbqt:
+        output_pdbqt = input_path.with_name(f"{input_path.stem}_prepared.pdbqt")
+
+    temp_pdb = f"temp_{input_path.stem}.pdb" # temporary intermediate
 
     try:
-        print(f"\033[97mPreparing ligand {input_pdb}....")
+        print(f"\033[97mPreparing ligand {input_pdb}......")
 
         # add H
         add_hydrogens(input_pdb, temp_pdb)
@@ -125,28 +169,34 @@ def prepare_ligand(input_pdb, output_pdbqt):
         if os.path.exists(temp_pdb):
             os.remove(temp_pdb)
 
-    print(f"\033[92mLigand prepared and saved as {output_pdbqt}")
+    print(f"\033[92mLigand prepared and saved as: {output_pdbqt}")
 
 
 
-def convert_to_pdb(input_file, output_file=None):
+def convert_to_pdb(input_file, output_pdb=None):
 
     input_path = Path(input_file)
     input_type = input_path.suffix.lower().lstrip(".")
 
-    if not output_file:
-        output_file = input_path.with_suffix(".pdb")
+    # default value for output_pdb
+    if not output_pdb:
+        output_pdb = input_path.with_suffix(".pdb")
+
+    if output_pdb.exists():
+        print(f"\033[93mWARNING: Overwriting existing file {output_pdb.name}")
 
     try:
         subprocess.run([
             "obabel",
             f"-i{input_type}", str(input_path),
-            "-opdb", "-O", str(output_file)
+            "-opdb", "-O", str(output_pdb)
         ], check=True)
-        print(f"\033[92mConverted {input_file} to {output_file}")
-        return str(output_file)
+
+        print(f"\033[92mConverted {input_file} to {output_pdb}")
+        return str(output_pdb)
+
     except subprocess.CalledProcessError as e:
-        print(f"\033[91mOpen Babel failed: {e}")
+        print(f"\033[91mERROR running Open Babel: {e}")
         return None
 
 
@@ -161,14 +211,17 @@ def batch_convert_to_pdb(input_dir, output_dir):
     files = [f for f in input_dir.iterdir() if f.suffix.lower() in supported_types]
 
     if not files:
-        print("\033[91mNo supported input files found")
+        print("\033[91mERROR: No supported input files found")
         return
 
     print(f"\033[97mConverting {len(files)} files to PDB......\n")
 
     for file in files:
         input_type = file.suffix.lower().lstrip(".")
-        output_file = output_dir / (file.stem + ".pdb")
+        output_file = output_dir / f"{file.stem}.pdb"
+
+        if output_file.exists():
+            print(f"\033[93mWARNING: Overwriting existing file {output_file.name}")
 
         try:
             subprocess.run([
@@ -176,15 +229,15 @@ def batch_convert_to_pdb(input_dir, output_dir):
                 f"-i{input_type}", str(file),
                 "-opdb", "-O", str(output_file)
             ], check=True)
-            print(f"\033[92mConverted: {file.name} to {output_file.name}")
+
         except subprocess.CalledProcessError as e:
-            print(f"\033[91mFailed to convert {file.name}: {e}")
+            print(f"\033[91mERROR running Open Babel: {e}")
 
-    print("\n\033[94m Batch conversion complete.")
+    print("\n\033[94mBatch conversion complete.")
 
 
 
-def batch_prepare_ligands(input_dir, output_dir):
+def batch_prepare_ligands(input_dir, output_dir, keep_original_name=False):
 
     input_dir = Path(input_dir)
     output_dir = Path(output_dir)
@@ -194,20 +247,20 @@ def batch_prepare_ligands(input_dir, output_dir):
     ligand_files = [f for f in input_dir.iterdir() if f.suffix.lower() in valid_extensions]
 
     if not ligand_files:
-        print("\033[91mNo valid ligand files found")
+        print("\033[91mERROR: No valid ligand files found")
         return
 
     print(f"\033[97mFound {len(ligand_files)} ligands in {input_dir}. Starting preparation......\n")
 
     for file in ligand_files:
-        output_file = output_dir / (file.stem + ".pdbqt")
 
-        try:
-            print(f"\033[97mPreparing: {file.name}")
-            prepare_ligand(str(file), str(output_file))
-            print(f"\033[92mSaved: {output_file.name}\n")
-        except Exception as e:
-            print(f"\033[91mFailed to process {file.name}: {e}\n")
+        if not keep_original_name:
+            output_pdbqt = output_dir / f"{file.stem}_prepared.pdbqt"
+        elif keep_original_name:
+            output_pdbqt = output_dir / f"{file.stem}.pdbqt"
+
+        prepare_ligand(str(file), str(output_pdbqt))
+
 
     print("\033[94mBatch ligand preparation complete")
 

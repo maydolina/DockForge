@@ -8,20 +8,22 @@ from DockForge.prep import (add_hydrogens,
                             batch_convert_to_pdb,
                             print_molecule_info)
 
-#add_hydrogens("/Users/mina/Downloads/7lyj.pdb", "output.pdb")
+#add_hydrogens("7lyj.pdb")
 
-#add_charges("/Users/mina/Downloads/asp.pdb", "output.pdbqt")
+#add_charges("asp.pdb")
 
-#simple_prepare_protein("/Users/mina/Downloads/7lyj.pdb", "output.pdbqt")
+#simple_prepare_protein("7lyj.pdb")
 
-advanced_prepare_protein("/Users/mina/Downloads/7lyj.pdb", "output.pdbqt")
+#advanced_prepare_protein("7lyj.pdb")
 
-#prepare_ligand("/Users/mina/Downloads/asp.pdb", "output.pdbqt")
+#prepare_ligand("asp.pdb")
 
-#batch_prepare_ligands("prepared_ligands", "2prepared_ligands")
+#batch_prepare_ligands("prepared_ligands", "3prepared_ligands", 1)
 
-#batch_convert_to_pdb("/Users/mina/Downloads/dataset2/ligands", "prepared_ligands")
+#batch_convert_to_pdb("ligands", "prepared_ligands")
 
 print("hello")
 
-print_molecule_info("/Users/mina/Downloads/asp.pdb")
+#print_molecule_info("asp.pdb")
+
+#convert_to_pdb("ZINC000000001644.sdf")
