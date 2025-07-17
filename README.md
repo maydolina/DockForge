@@ -7,6 +7,6 @@ Requires **Open Babel** to be installed separately. Install via:
 ```brew install open-babel``` or ```conda install -c conda-forge openbabel```  
 See [Open Babel installation instructions](https://openbabel.org/docs/Installation/install.html).
   
-Also requires PDBfixer. Install via:  
+Also requires **PDBfixer**. Install via:  
 ```conda install -c conda-forge pdbfixer```  
-See [Website](https://anaconda.org/conda-forge/pdbfixer).  
+See [official website](https://anaconda.org/conda-forge/pdbfixer).  
