@@ -7,10 +7,11 @@ from openmm.app import PDBFile
 
 
 def check_openbabel():
+
     try:
         subprocess.run(["obabel", "-V"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except FileNotFoundError:
-        print("\033[91mERROR: Open Babel (obabel) not found. Please install it and ensure it's in PATH.")
+        print("\033[91mERROR: Open Babel (obabel) not found. Please install and/or ensure it's in PATH.")
         exit(1)
 
 
@@ -33,6 +34,8 @@ def add_hydrogens(input_pdb, output_pdb=None):
 
 def add_charges(input_pdb, output_pdbqt=None):
 
+    check_openbabel()
+
     # default value for output_pdbqt
     input_path = Path(input_pdb)
     if not output_pdbqt:
@@ -47,8 +50,7 @@ def add_charges(input_pdb, output_pdbqt=None):
             "obabel",
             "-ipdb", input_pdb,
             "-opdbqt", "-O", output_pdbqt,
-            "-h",  # add H
-            "--partialcharge", "gasteiger"
+            "--partialcharge", "gasteiger" # add Gasteiger charges
         ], check=True)
         # saves file as PDBQT
 
@@ -57,9 +59,10 @@ def add_charges(input_pdb, output_pdbqt=None):
 
 
 
-
 # add H, remove waters
 def simple_prepare_protein(input_pdb, output_pdbqt=None):
+
+    check_openbabel()
 
     mol = next(pybel.readfile("pdb", input_pdb))
     print(f"\033[97m{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
@@ -90,6 +93,8 @@ def simple_prepare_protein(input_pdb, output_pdbqt=None):
 
 # add H at ph 7, add charges, remove water&ligands, add missing atoms&residudes
 def advanced_prepare_protein(input_pdb, output_pdbqt=None, ph=7.0):
+
+    check_openbabel()
 
     mol = next(pybel.readfile("pdb", input_pdb))
     print(f"\033[97m{len(mol.atoms)} atoms and {mol.OBMol.NumBonds()} bonds detected")
@@ -174,6 +179,8 @@ def prepare_ligand(input_pdb, output_pdbqt=None):
 
 
 def convert_to_pdb(input_file, output_pdb=None):
+
+    check_openbabel()
 
     input_path = Path(input_file)
     input_type = input_path.suffix.lower().lstrip(".")
